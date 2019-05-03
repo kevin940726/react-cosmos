@@ -13,9 +13,12 @@ export function getBaseWebpackConfig(
 ) {
   const { rootDir } = cosmosConfig;
   const { configPath } = createWebpackCosmosConfig(cosmosConfig);
+
+  const defaultConfig = getDefaultWebpackConfig(userWebpack, rootDir);
+
   if (!configPath || !moduleExists(configPath)) {
     console.log('[Cosmos] Using default webpack config');
-    return getDefaultWebpackConfig(userWebpack, rootDir);
+    return defaultConfig;
   }
 
   const relPath = path.relative(process.cwd(), configPath);
@@ -23,7 +26,7 @@ export function getBaseWebpackConfig(
 
   const userConfig = getDefaultExport(requireModule(configPath));
   return typeof userConfig === 'function'
-    ? userConfig(process.env.NODE_ENV, argv)
+    ? userConfig(defaultConfig, { env: process.env.NODE_ENV, argv })
     : userConfig;
 }
 
